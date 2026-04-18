@@ -26,7 +26,7 @@ This file is the project memory for Codex work sessions. Every new session shoul
 - Goal: split the current accumulated worktree changes into 15 commits.
 - Changed: repository history only, plus this session log entry.
 - Decision: preserve the existing file changes and group commits by feature area instead of rewriting or reverting user work.
-- Verification: planned to check commit count and final worktree status after committing.
+- Verification: split the worktree into 15 commits, then check the new commit count and final worktree status.
 - Follow-up: run full verification again after any remaining build lock is cleared.
 
 ### 2026-04-18
