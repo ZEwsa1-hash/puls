@@ -6,7 +6,8 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "session:note": "node scripts/add-session-note.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.1",
@@ -14,7 +15,6 @@
     "next": "16.2.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-force-graph-2d": "^1.29.1",
     "recharts": "^3.8.1",
     "zustand": "^5.0.12"
   },
