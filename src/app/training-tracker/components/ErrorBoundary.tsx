@@ -1,7 +1,12 @@
 // Error Boundary component for graceful error handling
 
 import React, { Component, ReactNode } from 'react';
-import { Card, Button } from 'antd';
+import { Alert, Button, Card, Space } from 'antd';
+
+const STORAGE_KEYS_TO_CLEAR = [
+  'training-tracker-v1',
+  'puls-training-storage',
+];
 
 interface Props {
   children: ReactNode;
@@ -31,25 +36,39 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
+  handleClearLocalData = () => {
+    STORAGE_KEYS_TO_CLEAR.forEach((key) => window.localStorage.removeItem(key));
+    this.handleReset();
+  };
+
   render() {
     if (this.state.hasError) {
       return (
         <div style={{ 
-          minHeight: '100vh', 
-          background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-          padding: '20px',
+          minHeight: '100vh',
+          background: '#101110',
+          padding: '16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <Card style={{ maxWidth: 500, textAlign: 'center' }}>
-            <h2 style={{ color: '#e74c3c', marginBottom: 16 }}>Something went wrong</h2>
-            <p style={{ marginBottom: 24, color: '#7f8c8d' }}>
-              The application encountered an error. Please try refreshing the page.
-            </p>
-            <Button type="primary" onClick={this.handleReset}>
-              Reload Application
-            </Button>
+          <Card style={{ width: '100%', maxWidth: 520 }}>
+            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+              <Alert
+                type="error"
+                showIcon
+                message="Страница тренировки не загрузилась"
+                description="Чаще всего это происходит из-за старых или поврежденных локальных данных в браузере."
+              />
+              <Space wrap>
+                <Button type="primary" onClick={this.handleReset}>
+                  Перезагрузить
+                </Button>
+                <Button danger onClick={this.handleClearLocalData}>
+                  Очистить локальные данные
+                </Button>
+              </Space>
+            </Space>
           </Card>
         </div>
       );

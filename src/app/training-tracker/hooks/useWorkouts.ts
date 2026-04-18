@@ -14,6 +14,35 @@ export interface UseWorkoutsReturn {
   getWorkout: (week: number, day: number) => Workout | undefined;
 }
 
+const isWorkoutType = (value: unknown): value is Workout['type'] => (
+  value === 'zone2' || value === 'hiit'
+);
+
+const toValidWorkout = (value: unknown): Workout | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Partial<Workout>;
+  const duration = Number(candidate.duration);
+  const heartRate = candidate.heartRate === undefined ? undefined : Number(candidate.heartRate);
+
+  if (!isWorkoutType(candidate.type) || !Number.isFinite(duration) || duration <= 0) {
+    return null;
+  }
+
+  if (heartRate !== undefined && (!Number.isFinite(heartRate) || heartRate < 40 || heartRate > 220)) {
+    return null;
+  }
+
+  return {
+    type: candidate.type,
+    duration,
+    heartRate,
+    date: typeof candidate.date === 'string' ? candidate.date : new Date().toISOString(),
+  };
+};
+
 /**
  * Custom hook for managing workout data with localStorage persistence
  */
@@ -28,12 +57,28 @@ export function useWorkouts(): UseWorkoutsReturn {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const data: StoredData = JSON.parse(stored);
+        const data = JSON.parse(stored) as Partial<StoredData>;
         const workoutMap = new Map<string, Workout>();
         
-        data.workouts.forEach(({ week, day, workout }) => {
-          workoutMap.set(`${week}-${day}`, workout);
-        });
+        if (Array.isArray(data.workouts)) {
+          data.workouts.forEach((entry) => {
+            const week = Number(entry?.week);
+            const day = Number(entry?.day);
+            const workout = toValidWorkout(entry?.workout);
+
+            if (
+              Number.isInteger(week) &&
+              Number.isInteger(day) &&
+              week >= 1 &&
+              week <= 8 &&
+              day >= 0 &&
+              day <= 6 &&
+              workout
+            ) {
+              workoutMap.set(`${week}-${day}`, workout);
+            }
+          });
+        }
         
         setWorkouts(workoutMap);
       }

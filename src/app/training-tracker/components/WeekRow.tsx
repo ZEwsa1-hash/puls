@@ -89,3 +89,5 @@ export const WeekRow: React.FC<WeekRowProps> = memo(({
     </div>
   );
 });
+
+WeekRow.displayName = 'WeekRow';

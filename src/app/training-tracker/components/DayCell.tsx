@@ -54,3 +54,5 @@ export const DayCell: React.FC<DayCellProps> = memo(({ day, workout, isToday, on
     </div>
   );
 });
+
+DayCell.displayName = 'DayCell';
