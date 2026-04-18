@@ -1,174 +1,224 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import React, { useMemo } from "react";
+import Link from "next/link";
+import { Button, Progress, Space, Tag, Typography } from "antd";
+import {
+  BarChartOutlined,
+  CalendarOutlined,
+  FireOutlined,
+  HeatMapOutlined,
+  ThunderboltOutlined,
+} from "@ant-design/icons";
+import AppLayout from "@/components/AppLayout";
+import { useGymStore, calculateTonnage } from "@/store/useGymStore";
+import { useWorkouts } from "@/app/training-tracker/hooks/useWorkouts";
+import { buildWeeklyOsSummary, gymWeekPlan } from "@/lib/weeklyOs";
+import "./weekly-os.css";
 
-const mockData = [
-  { time: '00:00', value: 62 },
-  { time: '04:00', value: 58 },
-  { time: '08:00', value: 72 },
-  { time: '12:00', value: 85 },
-  { time: '16:00', value: 78 },
-  { time: '20:00', value: 68 },
-  { time: '24:00', value: 64 },
-];
+const { Title, Text } = Typography;
 
-const mockStats = {
-  avg: 72,
-  max: 92,
-  min: 54,
-};
+function formatKg(value: number): string {
+  return `${Math.round(value).toLocaleString("ru-RU")} кг`;
+}
 
-const periods = ['День', 'Неделя', 'Месяц'];
-const menuItems = [
-  { name: 'Пульс', icon: '♥' },
-  { name: 'Питание', icon: '🍎' },
-  { name: 'Тренировки', icon: '🏃' },
-];
+function formatDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
 
-export default function Home() {
-  const [activePeriod, setActivePeriod] = useState('День');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [login, setLogin] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  return date.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "short",
+  });
+}
 
-  const handleLogin = () => {
-    if (login === 'Lin' && password === '12345') {
-      setIsLoggedIn(true);
-      setError('');
-    } else {
-      setError('Неверный логин или пароль');
-    }
-  };
+export default function WeeklyOsPage() {
+  const { workouts } = useWorkouts();
+  const gymSessions = useGymStore((state) => state.sessions);
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--background)' }}>
-        <div className="bg-[#1c1f26] p-8 rounded-lg w-80 border" style={{ borderColor: 'var(--border)' }}>
-          <h1 className="text-2xl font-bold text-center mb-6" style={{ color: 'var(--accent)' }}>Пульс</h1>
-          <input
-            type="text"
-            placeholder="Логин"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            className="w-full p-3 mb-4 rounded bg-[#16181c] border outline-none"
-            style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
-          />
-          <input
-            type="password"
-            placeholder="Пароль"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 mb-4 rounded bg-[#16181c] border outline-none"
-            style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
-          />
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          <button
-            onClick={handleLogin}
-            className="w-full p-3 rounded font-semibold transition-colors"
-            style={{ background: 'var(--accent)', color: '#0f1419' }}
-          >
-            Войти
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const summary = useMemo(
+    () => buildWeeklyOsSummary(workouts, gymSessions),
+    [workouts, gymSessions]
+  );
+
+  const cardioPercent = Math.min(
+    100,
+    Math.round((summary.cardio.totalMinutes / summary.cardio.targetMinutes) * 100)
+  );
+
+  const recentActivity = useMemo(() => {
+    const cardio = Array.from(workouts.values()).map((workout) => ({
+      id: `cardio-${workout.date}-${workout.type}-${workout.duration}`,
+      date: workout.date,
+      title: workout.type === "hiit" ? "HIIT" : "Zone 2",
+      detail: `${workout.duration} мин${workout.heartRate ? ` · ${workout.heartRate} bpm` : ""}`,
+    }));
+
+    const gym = gymSessions.map((session) => ({
+      id: session.id,
+      date: session.date,
+      title: session.title,
+      detail: `${session.exercises.length} упр. · ${formatKg(calculateTonnage(session.exercises))}`,
+    }));
+
+    return [...cardio, ...gym]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+  }, [gymSessions, workouts]);
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'var(--background)' }}>
-      <aside className="w-56 flex-shrink-0 p-4" style={{ background: 'var(--sidebar-bg)' }}>
-        <h1 className="text-2xl font-bold mb-8" style={{ color: 'var(--accent)' }}>Пульс</h1>
-        <nav className="space-y-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              className="w-full flex items-center gap-3 p-3 rounded transition-colors text-left"
-              style={{
-                background: item.name === 'Пульс' ? 'var(--card-bg)' : 'transparent',
-                color: item.name === 'Пульс' ? 'var(--accent)' : 'var(--text-muted)',
-              }}
+    <AppLayout>
+      <main className="weekly-os-page">
+        <section className="weekly-os-hero" aria-labelledby="today-title">
+          <div className="weekly-os-hero__copy">
+            <Text className="weekly-os-kicker">Сегодня · {summary.weekRangeLabel}</Text>
+            <Title id="today-title" className="weekly-os-title">
+              {summary.recommendation.title}
+            </Title>
+            <Text className="weekly-os-reason">{summary.recommendation.reason}</Text>
+          </div>
+
+          <div className="weekly-os-hero__action">
+            <Button
+              type="primary"
+              size="large"
+              icon={summary.recommendation.kind === "gym" ? <ThunderboltOutlined /> : <FireOutlined />}
+              href={summary.recommendation.href}
             >
-              <span>{item.icon}</span>
-              <span>{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="flex-1 p-6">
-        <div className="flex gap-2 mb-6">
-          {periods.map((period) => (
-            <button
-              key={period}
-              onClick={() => setActivePeriod(period)}
-              className="px-4 py-2 rounded transition-colors"
-              style={{
-                background: activePeriod === period ? 'var(--accent)' : 'var(--card-bg)',
-                color: activePeriod === period ? '#0f1419' : 'var(--text-muted)',
-              }}
-            >
-              {period}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="p-4 rounded" style={{ background: 'var(--card-bg)' }}>
-            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Среднее</div>
-            <div className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>{mockStats.avg}</div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>уд/мин</div>
+              {summary.recommendation.actionLabel}
+            </Button>
+            <Space size={8} wrap>
+              <Tag color={summary.gym.todayPlan ? "gold" : "default"}>
+                {summary.gym.todayPlan ? summary.gym.todayPlan.template : `Дальше: ${summary.gym.nextPlan.dayLabel}`}
+              </Tag>
+              <Tag color={summary.cardio.hasHiit ? "green" : "red"}>
+                {summary.cardio.hasHiit ? "HIIT закрыт" : "HIIT нужен"}
+              </Tag>
+            </Space>
           </div>
-          <div className="p-4 rounded" style={{ background: 'var(--card-bg)' }}>
-            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Макс</div>
-            <div className="text-2xl font-bold" style={{ color: '#ff6b6b' }}>{mockStats.max}</div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>уд/мин</div>
-          </div>
-          <div className="p-4 rounded" style={{ background: 'var(--card-bg)' }}>
-            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Мин</div>
-            <div className="text-2xl font-bold" style={{ color: '#4ecdc4' }}>{mockStats.min}</div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>уд/мин</div>
-          </div>
-        </div>
+        </section>
 
-        <div className="p-4 rounded" style={{ background: 'var(--card-bg)', height: '400px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={mockData}>
-              <XAxis
-                dataKey="time"
-                stroke="#71767b"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#71767b"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                domain={[40, 100]}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: '#1c1f26',
-                  border: '1px solid #2f3336',
-                  borderRadius: '8px',
-                  color: '#e7e9ea',
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#20b2aa"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 6, fill: '#20b2aa' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <section className="weekly-os-actions" aria-label="Быстрые действия">
+          <Link className="weekly-os-action" href="/gym">
+            <ThunderboltOutlined />
+            <span>Открыть Gym</span>
+            <strong>{summary.gym.sessions} сесс. за неделю</strong>
+          </Link>
+          <Link className="weekly-os-action" href="/training-tracker">
+            <FireOutlined />
+            <span>Записать кардио</span>
+            <strong>{summary.cardio.remainingMinutes} мин до базы</strong>
+          </Link>
+          <Link className="weekly-os-action" href="/analytics">
+            <BarChartOutlined />
+            <span>Проверить прогресс</span>
+            <strong>Кардио + Gym</strong>
+          </Link>
+          <Link className="weekly-os-action" href="/heatmap">
+            <HeatMapOutlined />
+            <span>Карта активности</span>
+            <strong>Годовой ритм</strong>
+          </Link>
+        </section>
+
+        <section className="weekly-os-grid" aria-label="Сводка недели">
+          <div className="weekly-os-panel weekly-os-panel--main">
+            <div className="weekly-os-panel__head">
+              <div>
+                <Text className="weekly-os-kicker">Кардио база</Text>
+                <Title level={3}>Zone 2 + HIIT</Title>
+              </div>
+              <strong>{cardioPercent}%</strong>
+            </div>
+            <Progress
+              percent={cardioPercent}
+              showInfo={false}
+              strokeColor="var(--acid)"
+              trailColor="rgba(244, 241, 232, 0.1)"
+            />
+            <div className="weekly-os-metrics">
+              <span>
+                <strong>{summary.cardio.totalMinutes}</strong>
+                мин всего
+              </span>
+              <span>
+                <strong>{summary.cardio.zone2Minutes}</strong>
+                Zone 2
+              </span>
+              <span>
+                <strong>{summary.cardio.hiitMinutes}</strong>
+                HIIT
+              </span>
+            </div>
+          </div>
+
+          <div className="weekly-os-panel">
+            <Text className="weekly-os-kicker">Gym неделя</Text>
+            <div className="weekly-os-big-number">{formatKg(summary.gym.tonnage)}</div>
+            <div className="weekly-os-metrics weekly-os-metrics--compact">
+              <span>{summary.gym.sessions} тренировок</span>
+              <span>{summary.gym.sets} подходов</span>
+            </div>
+          </div>
+
+          <div className="weekly-os-panel">
+            <Text className="weekly-os-kicker">Расписание</Text>
+            <div className="weekly-os-plan">
+              {gymWeekPlan.map((plan) => (
+                <div
+                  key={`${plan.dayIndex}-${plan.template}`}
+                  className={plan.dayIndex === new Date().getDay() ? "is-today" : ""}
+                >
+                  <span>{plan.dayLabel}</span>
+                  <strong>{plan.template}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="weekly-os-panel">
+            <Text className="weekly-os-kicker">Последнее</Text>
+            {summary.gym.latestSession ? (
+              <div className="weekly-os-latest">
+                <strong>{summary.gym.latestSession.title}</strong>
+                <span>{formatDate(summary.gym.latestSession.date)}</span>
+                <span>{formatKg(calculateTonnage(summary.gym.latestSession.exercises))}</span>
+              </div>
+            ) : (
+              <Text type="secondary">Пока нет записей Gym.</Text>
+            )}
+          </div>
+        </section>
+
+        <section className="weekly-os-timeline" aria-labelledby="activity-title">
+          <div className="weekly-os-section-head">
+            <div>
+              <Text className="weekly-os-kicker">Лента</Text>
+              <Title id="activity-title" level={3}>
+                Последние записи
+              </Title>
+            </div>
+            <CalendarOutlined />
+          </div>
+
+          {recentActivity.length > 0 ? (
+            <div className="weekly-os-feed">
+              {recentActivity.map((item) => (
+                <div key={item.id} className="weekly-os-feed__item">
+                  <time>{formatDate(item.date)}</time>
+                  <strong>{item.title}</strong>
+                  <span>{item.detail}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="weekly-os-empty">
+              <strong>Чистый старт</strong>
+              <span>Добавь первую запись в Gym или кардио, и здесь появится короткая история недели.</span>
+            </div>
+          )}
+        </section>
       </main>
-    </div>
+    </AppLayout>
   );
 }
