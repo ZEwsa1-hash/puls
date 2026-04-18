@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Puls Tracker",
-  description: "Локальная платформа для отслеживания кардио и силовых тренировок",
+  title: "Puls Weekly OS",
+  description: "Локальная панель для кардио, Gym и недельного тренировочного ритма",
   openGraph: {
-    title: "Puls Tracker",
-    description: "Локальная платформа для отслеживания кардио и силовых тренировок",
-  }
+    title: "Puls Weekly OS",
+    description: "Локальная панель для кардио, Gym и недельного тренировочного ритма",
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
       lang="ru"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
