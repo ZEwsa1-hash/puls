@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, Row, Col, Tag } from 'antd';
+import { Card } from 'antd';
 import AppLayout from '@/components/AppLayout';
 import './styles.css';
 

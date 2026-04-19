@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 :root {
   --background: #101110;
@@ -245,6 +245,145 @@ select {
 .ant-table-tbody > tr > td {
   border-color: var(--line) !important;
 }
+
+.auth-page {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background: var(--background);
+}
+
+.settings-page {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px 72px;
+}
+
+.settings-hero,
+.settings-panel {
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(25, 27, 24, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.settings-hero {
+  min-height: 220px;
+  padding: 28px;
+}
+
+.settings-kicker {
+  display: inline-block;
+  color: var(--acid);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.settings-title.ant-typography {
+  margin: 10px 0 12px;
+  color: var(--foreground);
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.settings-copy {
+  display: block;
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.settings-panel {
+  margin-top: 16px;
+  padding: 22px;
+}
+
+.settings-auth-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.settings-auth-card > .anticon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  color: var(--acid);
+  font-size: 24px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(17, 19, 15, 0.76);
+}
+
+.settings-auth-card h3.ant-typography,
+.settings-panel h3.ant-typography {
+  margin: 0 0 6px;
+  color: var(--foreground);
+}
+
+.settings-panel--compact {
+  display: grid;
+  gap: 8px;
+}
+
+.activity-heatmap {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(25, 27, 24, 0.9);
+}
+
+.activity-heatmap + .activity-heatmap {
+  margin-top: 14px;
+}
+
+.activity-heatmap .heatmap-board__header {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.activity-heatmap .heatmap-board__header h4.ant-typography {
+  margin: 0;
+  color: var(--foreground);
+}
+
+.activity-heatmap .heatmap-board__header .ant-typography {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.activity-heatmap .heatmap-board__scroller {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+.activity-heatmap .heatmap-board__legend {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 
 @media (max-width: 800px) {
   body {
@@ -563,5 +702,96 @@ select {
 
   .heatmap-board__scroller {
     padding-bottom: 12px !important;
+  }
+
+  .settings-page {
+    padding: 18px 12px 96px;
+  }
+
+  .settings-hero,
+  .settings-panel {
+    padding: 18px;
+  }
+
+  .settings-title.ant-typography {
+    font-size: 38px;
+  }
+
+  .settings-auth-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 800px) {
+  .app-shell,
+  .app-shell.ant-layout,
+  .app-shell.ant-layout-has-sider,
+  .app-shell.ant-layout.ant-layout-has-sider {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .app-sidebar {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    z-index: 40;
+    height: calc(66px + env(safe-area-inset-bottom)) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: rgba(14, 15, 13, 0.94) !important;
+    border-top: 1px solid rgba(244, 241, 232, 0.14);
+    border-bottom: 0 !important;
+    box-shadow: 0 -16px 42px rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(18px);
+  }
+
+  .app-sidebar .ant-layout-sider-children {
+    display: block !important;
+    height: 100%;
+    max-height: none !important;
+    overflow: visible;
+  }
+
+  .app-brand,
+  .app-sidebar .ant-layout-sider-trigger {
+    display: none !important;
+  }
+
+  .app-menu.ant-menu {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    height: 100%;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
+    overflow: visible;
+  }
+
+  .app-menu .ant-menu-item {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+  }
+
+  .app-menu .ant-menu-item .ant-menu-item-icon {
+    margin: 0 !important;
+    font-size: 20px;
+  }
+
+  .app-menu .ant-menu-title-content {
+    display: none !important;
+  }
+
+  .app-menu .ant-menu-item-selected {
+    box-shadow: inset 0 3px 0 var(--acid);
+  }
+
+  .app-main,
+  .app-content {
+    min-height: 100dvh !important;
   }
 }
