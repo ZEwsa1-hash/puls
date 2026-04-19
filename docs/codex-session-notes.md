@@ -21,6 +21,62 @@ This file is the project memory for Codex work sessions. Every new session shoul
 
 ## Session Log
 
+### 2026-04-19
+
+- Goal: split the accumulated worktree into 10 commits and push `master`.
+- Changed: existing staged app changes, auth/settings/analytics/navigation updates, assets, and `docs/codex-session-notes.md`.
+- Decision: keep the requested direct `master` push flow, group commits by feature area, and avoid a PR because the request was for commits plus push.
+- Verification: `npm.cmd run lint` passed; `npm.cmd run build` passed.
+- Follow-up: re-authenticate `gh` later if GitHub CLI PR or issue workflows are needed.
+
+### 2026-04-19
+
+- Goal: Clean current lint and build warnings.
+- Changed: `src/app/analytics/page.tsx`, `src/app/puls-kiro/page.tsx`, `docs/codex-session-notes.md`.
+- Decision: Remove unused puls-kiro imports and defer Recharts ResponsiveContainer rendering until client mount so static generation has no chart-size warning while preserving analytics panel layout..
+- Verification: npm.cmd run lint passed with no warnings; npm.cmd run build passed with no warnings..
+- Follow-up: Run a browser check on /analytics if exact chart hydration visuals need review..
+
+### 2026-04-19
+
+- Goal: Fix mobile bottom navigation route switching.
+- Changed: `src/components/AppLayout.tsx`.
+- Decision: Add an Ant Design Menu onClick handler that uses Next App Router navigation so the whole mobile tab item changes route even when the label Link is visually hidden..
+- Verification: npm.cmd run lint passed with only existing puls-kiro unused import warnings; npm.cmd run build passed with the existing Recharts static-generation size warning..
+- Follow-up: Visually tap through the mobile bottom tabs on a phone or browser emulator..
+
+### 2026-04-19
+
+- Goal: Fix Today page mojibake text.
+- Changed: `src/app/page.tsx`, `src/lib/weeklyOs.ts`, `docs/codex-session-notes.md`.
+- Decision: Rewrite Today page copy and weekly recommendation strings as valid UTF-8 Russian, and point recovery action to Analytics instead of the redirected Heatmap route..
+- Verification: npm.cmd run lint passed with only pre-existing puls-kiro warnings; npm.cmd run build passed with the existing Recharts static-generation size warning..
+- Follow-up: Continue replacing mojibake on any other page where it appears, especially Analytics or Training if visible..
+
+### 2026-04-19
+
+- Goal: Restore drawn Gym muscle figure.
+- Changed: `src/app/gym/page.tsx`, `src/app/globals.css`, `docs/codex-session-notes.md`.
+- Decision: Use the drawn inline SVG muscle figure for weekly muscle status instead of rendering the reference PNG, while keeping the previously fixed readable Gym text..
+- Verification: npm.cmd run lint passed with only pre-existing puls-kiro warnings; npm.cmd run build passed with the existing Recharts static-generation size warning..
+- Follow-up: Remove unused public/muscle-reference.png later if no other page needs the reference asset..
+
+### 2026-04-19
+
+- Goal: Fix mojibake text on Gym page.
+- Changed: `src/app/gym/page.tsx`, `docs/codex-session-notes.md`.
+- Decision: Replace garbled Russian literals and template exercise names in Gym with valid UTF-8 Russian text while keeping existing data and page behavior unchanged..
+- Verification: npm.cmd run lint passed with only pre-existing puls-kiro warnings; npm.cmd run build passed with the existing Recharts static-generation size warning..
+- Follow-up: If old browser localStorage contains sessions created from garbled templates, edit or recreate those stored workout names once in the UI..
+
+### 2026-04-19
+
+- Goal: Implement mobile app navigation, analytics heatmaps, Gym reference image, and Clerk settings.
+- Changed: `package.json`, `package-lock.json`, `.gitignore`, `public/muscle-reference.png`, `src/app/layout.tsx`, `src/proxy.ts`, `src/components/AppLayout.tsx`, `src/components/ActivityHeatmap.tsx`, `src/app/page.tsx`, `src/app/analytics/page.tsx`, `src/app/heatmap/page.tsx`, `src/app/gym/page.tsx`, `src/app/settings/page.tsx`, `src/app/sign-in/[[...sign-in]]/page.tsx`, `src/app/sign-up/[[...sign-up]]/page.tsx`, `src/app/globals.css`.
+- Decision: Use a mobile-only bottom icon tab bar, move Puls and Gym activity heatmaps into Analytics, redirect /heatmap to /analytics, keep local training data independent from Clerk auth, and make Clerk gracefully disabled until env keys are present..
+- Verification: npm.cmd run lint passed with only pre-existing puls-kiro warnings; npm.cmd run build passed; curl checks returned 200 for /, /analytics, /gym, /training-tracker, /settings and public image, and 307 for /heatmap redirect..
+- Follow-up: Add real Clerk env keys in .env.local to enable sign-in/sign-up flows; optionally clean the old puls-kiro lint warnings..
+
 ### 2026-04-18
 
 - Goal: split the current accumulated worktree changes into 15 commits.
