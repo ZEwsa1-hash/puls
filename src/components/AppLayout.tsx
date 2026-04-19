@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Layout, Menu, Typography, ConfigProvider, theme } from 'antd';
+import { Layout, Menu, Typography, ConfigProvider, theme, type MenuProps } from 'antd';
 import {
   BarChartOutlined,
   CalendarOutlined,
-  HeatMapOutlined,
   HomeOutlined,
+  SettingOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const { Sider, Content } = Layout;
 const { Title } = Typography;
@@ -40,6 +40,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    router.push(String(key));
+  };
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 800px)');
@@ -55,27 +60,27 @@ export default function AppLayout({ children }: AppLayoutProps) {
     {
       key: '/',
       icon: <CalendarOutlined />,
-      label: <Link href="/">Сегодня</Link>,
+      label: <Link href="/" aria-label="Сегодня">Сегодня</Link>,
     },
     {
       key: '/training-tracker',
       icon: <HomeOutlined />,
-      label: <Link href="/training-tracker">План</Link>,
+      label: <Link href="/training-tracker" aria-label="План">План</Link>,
     },
     {
       key: '/gym',
       icon: <ThunderboltOutlined />,
-      label: <Link href="/gym">Gym</Link>,
+      label: <Link href="/gym" aria-label="Gym">Gym</Link>,
     },
     {
       key: '/analytics',
       icon: <BarChartOutlined />,
-      label: <Link href="/analytics">Аналитика</Link>,
+      label: <Link href="/analytics" aria-label="Аналитика">Аналитика</Link>,
     },
     {
-      key: '/heatmap',
-      icon: <HeatMapOutlined />,
-      label: <Link href="/heatmap">Карта</Link>,
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: <Link href="/settings" aria-label="Настройки">Настройки</Link>,
     },
   ];
 
@@ -94,7 +99,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         } : undefined}
       >
         <Sider
-          collapsible
+          collapsible={!isMobile}
           collapsed={sidebarCollapsed}
           onCollapse={setSidebarCollapsed}
           theme="dark"
@@ -105,8 +110,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             width: '100%',
             maxWidth: '100%',
             minWidth: 0,
-            height: 'auto',
-            maxHeight: 132,
+            height: 76,
           } : undefined}
         >
           <div className="app-brand">
@@ -122,6 +126,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             mode="inline"
             items={menuItems}
             className="app-menu"
+            onClick={handleMenuClick}
           />
         </Sider>
 
