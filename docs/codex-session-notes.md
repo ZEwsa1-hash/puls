@@ -23,6 +23,14 @@ This file is the project memory for Codex work sessions. Every new session shoul
 
 ### 2026-04-19
 
+- Goal: ignore the local `referens/` folder.
+- Changed: `.gitignore`, removed `referens/image.png` from the Git index, and updated `docs/codex-session-notes.md`.
+- Decision: treat `referens/` as local reference material while keeping the copied app asset `public/muscle-reference.png` tracked.
+- Verification: `git check-ignore -v referens/image.png` confirms the folder is ignored; `git status --short` shows only the intended `.gitignore`, index removal, and session note changes.
+- Follow-up: commit and push if this should be published.
+
+### 2026-04-19
+
 - Goal: ignore local agent and IDE files.
 - Changed: `.gitignore`, removed `AGENTS.md`, `CLAUDE.md`, `.vscode/settings.json`, and `.kiro/specs/*` from the Git index.
 - Decision: ignore both uppercase and lowercase `AGENTS.md`/`CLAUDE.md` variants, ignore `.vscode/` and `.kiro/`, remove comments from `.gitignore`, and keep `referens/` plus `public/muscle-reference.png` tracked as project assets.
