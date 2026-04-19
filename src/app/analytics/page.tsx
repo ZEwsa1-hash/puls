@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Typography, Row, Col } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, Bar, Pie } from 'recharts';
@@ -8,12 +8,15 @@ import dynamic from 'next/dynamic';
 import { usePulsStore } from '@/store/usePulsStore';
 import { useGymStore, calculateOneRepMax, calculateTonnage } from '@/store/useGymStore';
 import AppLayout from '@/components/AppLayout';
+import { ActivityHeatmap, addDays, toDateKey } from '@/components/ActivityHeatmap';
 
 // Lazy load heavy recharts chart containers
 const PieChart = dynamic(() => import('recharts').then((mod) => mod.PieChart), { ssr: false, loading: () => <LoadingOutlined style={{ fontSize: 24, color: '#8c8c8c' }} /> });
 const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), { ssr: false, loading: () => <LoadingOutlined style={{ fontSize: 24, color: '#8c8c8c' }} /> });
 
 const { Title, Text } = Typography;
+const PULS_START_DATE = '2026-02-18';
+const DAYS_IN_WEEK = 7;
 
 type ExerciseStat = {
   name: string;
@@ -24,8 +27,13 @@ type ExerciseStat = {
 };
 
 export default function AnalyticsDashboard() {
+  const [chartsMounted, setChartsMounted] = useState(false);
   const { weeks } = usePulsStore();
   const { sessions: gymSessions } = useGymStore();
+
+  useEffect(() => {
+    setChartsMounted(true);
+  }, []);
 
   // Data Aggregation
   const zoneStats = {
@@ -142,6 +150,33 @@ export default function AnalyticsDashboard() {
     tonnage: calculateTonnage(session.exercises),
   }));
 
+  const pulsHeatmapData = useMemo(() => {
+    const data: Record<string, number> = {};
+    const start = new Date(PULS_START_DATE);
+
+    weeks.forEach((week, weekIndex) => {
+      week.days.forEach((day, dayIndex) => {
+        if (day.state === 'empty' || day.minutes <= 0) return;
+
+        const date = addDays(start, weekIndex * DAYS_IN_WEEK + dayIndex);
+        const dateKey = toDateKey(date);
+        data[dateKey] = (data[dateKey] || 0) + day.minutes;
+      });
+    });
+
+    return data;
+  }, [weeks]);
+
+  const gymHeatmapData = useMemo(() => {
+    const data: Record<string, number> = {};
+
+    gymSessions.forEach((session) => {
+      data[session.date] = (data[session.date] || 0) + calculateTonnage(session.exercises);
+    });
+
+    return data;
+  }, [gymSessions]);
+
   // Find most frequent zone
   let favoriteZone = 'Нет данных';
   let maxMin = 0;
@@ -198,8 +233,10 @@ export default function AnalyticsDashboard() {
                      <Text style={{ color: '#8c8c8c', fontSize: '13px' }}>Доля минут, проведенных в каждой пульсовой зоне</Text>
                      
                      <div className="analytics-chart" style={{ height: '300px', marginTop: '20px' }}>
-                        {pieData.length > 0 ? (
-                           <ResponsiveContainer width="100%" height="100%">
+                        {!chartsMounted ? (
+                           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555' }}>Загрузка графика</div>
+                        ) : pieData.length > 0 ? (
+                           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                               <PieChart>
                                  <Pie
                                     data={pieData}
@@ -235,7 +272,8 @@ export default function AnalyticsDashboard() {
                      <Text style={{ color: '#8c8c8c', fontSize: '13px' }}>Время в минутах по типам тренировок</Text>
                      
                      <div className="analytics-chart" style={{ height: '300px', marginTop: '20px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                        {chartsMounted ? (
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                            <BarChart data={weeklyData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                               <XAxis dataKey="name" stroke="#888" tickLine={false} axisLine={false} />
@@ -249,6 +287,9 @@ export default function AnalyticsDashboard() {
                               <Bar dataKey="other" name="Остальные зоны" stackId="a" fill="#38bdf8" radius={[4, 4, 0, 0]} />
                            </BarChart>
                         </ResponsiveContainer>
+                        ) : (
+                           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555' }}>Загрузка графика</div>
+                        )}
                      </div>
                   </div>
                </Col>
@@ -294,8 +335,10 @@ export default function AnalyticsDashboard() {
                      <Text style={{ color: '#8c8c8c', fontSize: '13px' }}>Суммарный вес по каждой записи в зале</Text>
 
                      <div className="analytics-chart" style={{ height: '300px', marginTop: '20px' }}>
-                        {gymSessionData.length > 0 ? (
-                           <ResponsiveContainer width="100%" height="100%">
+                        {!chartsMounted ? (
+                           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555' }}>Загрузка графика</div>
+                        ) : gymSessionData.length > 0 ? (
+                           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                               <BarChart data={gymSessionData} margin={{ top: 20, right: 0, left: -10, bottom: 0 }}>
                                  <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                  <XAxis dataKey="name" stroke="#888" tickLine={false} axisLine={false} />
@@ -352,6 +395,27 @@ export default function AnalyticsDashboard() {
                   </div>
                </Col>
             </Row>
+
+            <div style={{ marginTop: '48px', marginBottom: '24px' }}>
+              <span style={{ color: '#35c3ff', fontSize: '16px', fontWeight: 800 }}>
+                Activity Heatmap
+              </span>
+            </div>
+
+            <div className="analytics-heatmaps" style={{ display: 'grid', gap: '14px' }}>
+              <ActivityHeatmap
+                title="Puls / Cardio"
+                tone="white"
+                dataMap={pulsHeatmapData}
+                unit="мин"
+              />
+              <ActivityHeatmap
+                title="Gym / Тоннаж"
+                tone="blue"
+                dataMap={gymHeatmapData}
+                unit="кг"
+              />
+            </div>
       </div>
     </AppLayout>
   );
