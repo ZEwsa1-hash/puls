@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.1",
+    "@clerk/nextjs": "^7.2.3",
     "antd": "^6.3.5",
     "next": "16.2.3",
     "react": "19.2.4",

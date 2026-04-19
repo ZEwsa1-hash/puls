@@ -68,3 +68,6 @@ tmp/
 .cache/
 .turbo/
 .eslintcache
+
+# clerk configuration (can include secrets)
+/.clerk/
