@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useMemo } from "react";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import {
   BarChartOutlined,
   CalendarOutlined,
   FireOutlined,
-  HeatMapOutlined,
+  SettingOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import AppLayout from "@/components/AppLayout";
@@ -114,10 +114,10 @@ export default function WeeklyOsPage() {
             <span>Проверить прогресс</span>
             <strong>Кардио + Gym</strong>
           </Link>
-          <Link className="weekly-os-action" href="/heatmap">
-            <HeatMapOutlined />
-            <span>Карта активности</span>
-            <strong>Годовой ритм</strong>
+          <Link className="weekly-os-action" href="/settings">
+            <SettingOutlined />
+            <span>Настройки</span>
+            <strong>Аккаунт и вход</strong>
           </Link>
         </section>
 

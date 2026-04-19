@@ -138,8 +138,8 @@ function buildRecommendation(
     kind: "recovery",
     title: "Восстановление",
     reason: "Силовая по расписанию не стоит, недельная кардио-база и HIIT закрыты.",
-    actionLabel: "Посмотреть карту",
-    href: "/heatmap",
+    actionLabel: "Открыть аналитику",
+    href: "/analytics",
   };
 }
 
