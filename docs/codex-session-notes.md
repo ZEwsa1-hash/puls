@@ -23,6 +23,14 @@ This file is the project memory for Codex work sessions. Every new session shoul
 
 ### 2026-04-19
 
+- Goal: ignore local agent and IDE files.
+- Changed: `.gitignore`, removed `AGENTS.md`, `CLAUDE.md`, `.vscode/settings.json`, and `.kiro/specs/*` from the Git index.
+- Decision: ignore both uppercase and lowercase `AGENTS.md`/`CLAUDE.md` variants, ignore `.vscode/` and `.kiro/`, remove comments from `.gitignore`, and keep `referens/` plus `public/muscle-reference.png` tracked as project assets.
+- Verification: `git check-ignore -v` confirms the requested files, `.kiro/`, `.clerk/`, `node_modules`, `.next`, `tsconfig.tsbuildinfo`, and `next-env.d.ts` are ignored; `git ls-files -o --exclude-standard` returned no unignored untracked files.
+- Follow-up: commit the `.gitignore` change plus index removals when ready.
+
+### 2026-04-19
+
 - Goal: split the accumulated worktree into 10 commits and push `master`.
 - Changed: existing staged app changes, auth/settings/analytics/navigation updates, assets, and `docs/codex-session-notes.md`.
 - Decision: keep the requested direct `master` push flow, group commits by feature area, and avoid a PR because the request was for commits plus push.
